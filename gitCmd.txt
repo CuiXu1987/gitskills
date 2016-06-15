@@ -1,0 +1,83 @@
+参考自http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000
+一、配置
+git config --global user.name "Your Name"
+git config --global user.email "email@example.com" 使用--global参数表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址
+二、提交
+git status
+git init 初始化生成.git文件夹
+git add test.txt 将改动添加到暂存区，可以多次执行add命令，然后一次性commit.比如git add file1.txt/git add file2.txt file3.txt git commit -m "add 3 files."
+git commit -m "本次提交的说明备注"
+git log 查看提交记录 git log --pretty=oneline 此参数可以将日志简略为版本号加提交说明
+git diff 查看更改记录
+三、往返任意一个版本
+git reset --hard HEAD^ 回退版本，HEAD^^表示回退上上一个版本，HEAD^100表示回退上100个版本
+HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id。
+穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本。
+要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本。
+四、撤消修改
+命令git checkout -- readme.txt意思就是，把readme.txt文件在工作区的修改全部撤销，这里有两种情况：
+一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+总之，就是让这个文件回到最近一次git commit或git add时的状态。
+用命令git reset HEAD file可以把暂存区的修改撤销掉（unstage），重新放回工作区
+五、删除
+git rm test.txt
+git commit -m "remove"
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+六、远程连接
+添加远程库：
+git remote add origin git@github.com:CuiXu1987/TestGit.git
+origin是远程仓库在本地别名，你可以自由取，git链接是在建立远程仓库时要你记下的ssh连接。此句就是在本地建立远程仓库别名并链接到远程仓库。
+git push -u origin master
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+从远程库克隆：
+git remote -v
+fetch抓取权限
+push推送权限
+git push origin master
+git push origin dev
+
+git clone git@github.com:CuiXu1987/gitskills.git 会将远程项目下载到当前路径master
+git checkout -b dev origin/dev要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支
+git commit -m ""
+git push origin dev 提交到dev分支
+先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+git branch --set-upstream dev origin/dev
+git pull
+git commit -m ""
+git push origin dev 
+因此，多人协作的工作模式通常是这样：
+首先，可以试图用git push origin branch-name推送自己的修改；
+如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+如果合并有冲突，则解决冲突，并在本地提交；
+没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功！
+如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream branch-name origin/branch-name。
+这就是多人协作的工作模式，一旦熟悉了，就非常简单。
+七、分支
+在撤消操作中，git checkout -- file命令中的--很重要，没有--，就变成了“切换到另一个分支”的命令
+创建dev分支并切换：
+git branch dev 创建dev分支
+git checkout dev 切换分支
+也可以合并成一行：git checkout -b dev 创建加切换
+git branch可以查看当前分支，git checkout master/dev则可以切换当前所处分支
+git merge dev用于合并指定分支dev到当前分支master
+git branch -d dev则是合并后删除掉dev分支 丢弃一个没有合并过的分支需要git branch -D dev
+
+master发布稳定版本 只在发布时使用
+dev为开发分支 内部使用
+从dev上每个小组成员都有自己的分支 做完提交
+
+如果当前分支没有做完 想另起分支去做另一个任务 可以使用Stash功能
+git stash
+git dev 进入dev分支
+git checkout -b issue-101
+git add xx.txt
+git commit -m "fix bug"
+git checkout dev
+git merge --no--ff -m "merged bug fix" issue-101
+git branch -d issue-101
+git stash apply恢复后，stash内容并不删除，你需要用git stash drop来删除；
+git stash pop恢复的同时把stash内容也删了：
+
